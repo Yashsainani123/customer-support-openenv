@@ -7,18 +7,21 @@ def run_inference():
     total_reward = 0
     steps = 0
 
-    for ticket in state.tickets:
+    for ticket in state["tickets"]:
         action = {
-            "ticket_id": ticket.id,
-            "assign_to": "billing" if "payment" in ticket.issue else "technical",
+            "ticket_id": ticket["id"],
+            "assign_to": "billing" if "payment" in ticket["issue"] else "technical",
             "response": "We are working on your issue, thank you for your patience."
         }
 
-        state, reward, done, _ = env.step(type("obj", (), action))
+        obj = type("Action", (), action)
+
+        state, reward, done, _ = env.step(obj)
+
         total_reward += reward
         steps += 1
 
-    return total_reward / steps
+    return {"score": round(total_reward / steps, 2)}
 
 
 if __name__ == "__main__":
