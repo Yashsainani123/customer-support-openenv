@@ -1,36 +1,5 @@
-import os
-from openai import OpenAI
-from app.env import SupportEnv
-
-# ✅ Required env variables
-API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
-MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4o-mini")
-HF_TOKEN = os.getenv("HF_TOKEN")
-
-client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
-
-
-def classify_issue(issue):
-    try:
-        response = client.chat.completions.create(
-            model=MODEL_NAME,
-            messages=[
-                {"role": "system", "content": "Classify support tickets into 'billing' or 'technical'."},
-                {"role": "user", "content": issue}
-            ]
-        )
-        result = response.choices[0].message.content.lower()
-
-        if "billing" in result:
-            return "billing"
-        return "technical"
-
-    except Exception:
-        return "technical"
-
-
 def run_inference():
-    print("START")
+    print("[START] task=support_env", flush=True)
 
     env = SupportEnv()
     state = env.reset()
@@ -49,7 +18,7 @@ def run_inference():
                 if ticket_id is None:
                     continue
 
-                issue = str(getattr(ticket, "issue", ""))
+                issue = str(getattr(ticket, "issue", "")).lower()
 
                 assign = classify_issue(issue)
 
@@ -65,10 +34,11 @@ def run_inference():
 
                 state, reward, done, _ = env.step(obj)
 
-                print(f"STEP: ticket_id={ticket_id}, assign={assign}, reward={reward}")
-
-                total_reward += reward
                 steps += 1
+                total_reward += reward
+
+                # ✅ REQUIRED FORMAT
+                print(f"[STEP] step={steps} reward={reward}", flush=True)
 
                 if done:
                     break
@@ -77,14 +47,11 @@ def run_inference():
                 break
 
     except Exception as e:
-        print("ERROR:", str(e))
+        print(f"[ERROR] message={str(e)}", flush=True)
 
     score = round(total_reward / steps, 2) if steps > 0 else 0.0
 
-    print("END")
+    # ✅ REQUIRED FORMAT
+    print(f"[END] task=support_env score={score} steps={steps}", flush=True)
 
     return {"score": score}
-
-
-if __name__ == "__main__":
-    print(run_inference())
