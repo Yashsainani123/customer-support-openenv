@@ -27,9 +27,9 @@ def step(action: Action):
 @app.get("/tasks")
 def tasks():
     return [
-        {"name": "easy", "goal": "Assign correct department"},
-        {"name": "medium", "goal": "Assign + good response"},
-        {"name": "hard", "goal": "Handle SLA, load, multiple tickets"}
+        {"name": "easy_task", "goal": "Assign correct department"},
+        {"name": "medium_task", "goal": "Assign + good response"},
+        {"name": "hard_task", "goal": "Handle SLA, load, multiple tickets"}
     ]
 
 # ✅ BASELINE ENDPOINT

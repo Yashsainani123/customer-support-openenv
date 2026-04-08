@@ -55,5 +55,6 @@ def calculate_reward(ticket, action, agent, current_time):
     if agent.current_tasks > 2:
         score -= 0.4
 
-    # Normalize score between 0 and 1
-    return max(0.0, min(1.0, score))
+    # Normalize score strictly between 0 and 1 (not including 0 or 1)
+    normalized = max(0.01, min(0.99, score))
+    return float(normalized)

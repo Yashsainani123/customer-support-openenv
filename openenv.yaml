@@ -7,6 +7,6 @@ endpoints:
   state: /state
 
 tasks:
-  - name: easy
-  - name: medium
-  - name: hard
+  - name: easy_task
+  - name: medium_task
+  - name: hard_task

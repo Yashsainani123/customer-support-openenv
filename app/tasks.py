@@ -46,6 +46,7 @@ def run_task(env, assign_to):
 
 
 # ✅ TASKS
+
 def easy_task(env):
     return run_task(env, "billing")
 
@@ -59,6 +60,7 @@ def hard_task(env):
 
 
 # ✅ GRADERS (STRICT SAFE)
+
 def easy_grader(score):
     score = float(score)
     return min(0.99, max(0.01, score))
