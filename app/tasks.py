@@ -2,7 +2,7 @@
 
 def easy_task(env):
     state = env.reset()
-    total_reward = 0
+    total_reward = 0.0
 
     for _ in range(3):
         if not state.tickets:
@@ -16,12 +16,12 @@ def easy_task(env):
         action.response = "ok"
 
         state, reward, done, _ = env.step(action)
-        total_reward += reward
+        total_reward += float(reward)
 
         if done:
             break
 
-    return total_reward
+    return float(total_reward)
 
 
 def easy_grader(score):
@@ -30,7 +30,7 @@ def easy_grader(score):
 
 def medium_task(env):
     state = env.reset()
-    total_reward = 0
+    total_reward = 0.0
 
     for _ in range(3):
         if not state.tickets:
@@ -44,12 +44,12 @@ def medium_task(env):
         action.response = "ok"
 
         state, reward, done, _ = env.step(action)
-        total_reward += reward
+        total_reward += float(reward)
 
         if done:
             break
 
-    return total_reward
+    return float(total_reward)
 
 
 def medium_grader(score):
@@ -58,7 +58,7 @@ def medium_grader(score):
 
 def hard_task(env):
     state = env.reset()
-    total_reward = 0
+    total_reward = 0.0
 
     for _ in range(3):
         if not state.tickets:
@@ -72,21 +72,21 @@ def hard_task(env):
         action.response = "ok"
 
         state, reward, done, _ = env.step(action)
-        total_reward += reward
+        total_reward += float(reward)
 
         if done:
             break
 
-    return total_reward
+    return float(total_reward)
 
 
 def hard_grader(score):
     return float(score)
 
 
-# 🔥 IMPORTANT: EXACT FORMAT REQUIRED
+# 🔥 DO NOT MODIFY THIS STRUCTURE
 TASKS = [
-    {"name": "easy", "task": easy_task, "grader": easy_grader},
-    {"name": "medium", "task": medium_task, "grader": medium_grader},
-    {"name": "hard", "task": hard_task, "grader": hard_grader},
+    {"name": "task_easy", "task": easy_task, "grader": easy_grader},
+    {"name": "task_medium", "task": medium_task, "grader": medium_grader},
+    {"name": "task_hard", "task": hard_task, "grader": hard_grader},
 ]
