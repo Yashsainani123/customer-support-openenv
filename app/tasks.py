@@ -18,20 +18,31 @@ def run_task(env, assign_to):
 
         state, reward, done, _ = env.step(action)
 
-        total_reward += float(reward)
+        # ensure numeric safety
+        try:
+            total_reward += float(reward)
+        except:
+            total_reward += 0.0
+
         steps += 1
 
         if done:
             break
 
-    # avoid zero division
+    # fallback if no steps
     if steps == 0:
-        return 0.1
+        return 0.5
 
     avg = total_reward / steps
 
-    # 🔥 normalize strictly between (0,1)
-    normalized = 1 / (1 + abs(avg))   # always (0,1)
+    # 🔥 SAFE NORMALIZATION (NEVER 0 or 1)
+    normalized = 0.5 + (avg * 0.01)
+
+    # clamp strictly inside (0,1)
+    if normalized <= 0.0:
+        normalized = 0.01
+    elif normalized >= 1.0:
+        normalized = 0.99
 
     return float(normalized)
 
@@ -49,17 +60,20 @@ def hard_task(env):
     return run_task(env, "billing")
 
 
-# ✅ GRADERS (pass-through but safe)
+# ✅ GRADERS (STRICT SAFE)
 def easy_grader(score):
-    return float(max(0.01, min(0.99, score)))
+    score = float(score)
+    return min(0.99, max(0.01, score))
 
 
 def medium_grader(score):
-    return float(max(0.01, min(0.99, score)))
+    score = float(score)
+    return min(0.99, max(0.01, score))
 
 
 def hard_grader(score):
-    return float(max(0.01, min(0.99, score)))
+    score = float(score)
+    return min(0.99, max(0.01, score))
 
 
 # ✅ REQUIRED FORMAT
