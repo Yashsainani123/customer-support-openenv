@@ -35,14 +35,12 @@ def run_task(env, assign_to):
 
     avg = total_reward / steps
 
-    # 🔥 SAFE NORMALIZATION (NEVER 0 or 1)
-    normalized = 0.5 + (avg * 0.01)
+    # ✅ SAFE NORMALIZATION USING SIGMOID (ALWAYS BETWEEN 0 AND 1)
+    import math
+    normalized = 1 / (1 + math.exp(-avg))
 
     # clamp strictly inside (0,1)
-    if normalized <= 0.0:
-        normalized = 0.01
-    elif normalized >= 1.0:
-        normalized = 0.99
+    normalized = min(0.99, max(0.01, normalized))
 
     return float(normalized)
 
