@@ -1,9 +1,10 @@
-# ✅ Task 1
+# app/tasks.py
+
 def easy_task(env):
     state = env.reset()
     total_reward = 0
 
-    for _ in range(5):
+    for _ in range(3):
         if not state.tickets:
             break
 
@@ -12,7 +13,7 @@ def easy_task(env):
         action = type("Action", (), {})()
         action.ticket_id = ticket.id
         action.assign_to = "billing"
-        action.response = "Working on it"
+        action.response = "ok"
 
         state, reward, done, _ = env.step(action)
         total_reward += reward
@@ -24,15 +25,14 @@ def easy_task(env):
 
 
 def easy_grader(score):
-    return score >= 0
+    return float(score)
 
 
-# ✅ Task 2
 def medium_task(env):
     state = env.reset()
     total_reward = 0
 
-    for _ in range(5):
+    for _ in range(3):
         if not state.tickets:
             break
 
@@ -41,7 +41,7 @@ def medium_task(env):
         action = type("Action", (), {})()
         action.ticket_id = ticket.id
         action.assign_to = "technical"
-        action.response = "Fixing issue"
+        action.response = "ok"
 
         state, reward, done, _ = env.step(action)
         total_reward += reward
@@ -53,15 +53,14 @@ def medium_task(env):
 
 
 def medium_grader(score):
-    return score >= 0
+    return float(score)
 
 
-# ✅ Task 3
 def hard_task(env):
     state = env.reset()
     total_reward = 0
 
-    for _ in range(5):
+    for _ in range(3):
         if not state.tickets:
             break
 
@@ -70,7 +69,7 @@ def hard_task(env):
         action = type("Action", (), {})()
         action.ticket_id = ticket.id
         action.assign_to = "billing"
-        action.response = "Resolved quickly"
+        action.response = "ok"
 
         state, reward, done, _ = env.step(action)
         total_reward += reward
@@ -82,12 +81,12 @@ def hard_task(env):
 
 
 def hard_grader(score):
-    return score >= 0
+    return float(score)
 
 
-# ✅ REQUIRED: TASK REGISTRY (MANDATORY)
+# 🔥 IMPORTANT: EXACT FORMAT REQUIRED
 TASKS = [
-    {"task": easy_task, "grader": easy_grader},
-    {"task": medium_task, "grader": medium_grader},
-    {"task": hard_task, "grader": hard_grader},
+    {"name": "easy", "task": easy_task, "grader": easy_grader},
+    {"name": "medium", "task": medium_task, "grader": medium_grader},
+    {"name": "hard", "task": hard_task, "grader": hard_grader},
 ]
