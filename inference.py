@@ -1,14 +1,47 @@
-def run_inference():
-    print("[START] task=support_env", flush=True)
+import sys
+import os
 
-    env = SupportEnv()
-    state = env.reset()
+# ✅ Fix path for Hugging Face environment
+BASE_DIR = os.path.dirname(__file__)
+APP_DIR = os.path.join(BASE_DIR, "app")
+sys.path.append(APP_DIR)
+
+# ✅ Safe imports
+try:
+    from env import SupportEnv
+except Exception as e:
+    print(f"[IMPORT ERROR] SupportEnv: {e}", flush=True)
+    SupportEnv = None
+
+try:
+    from models import classify_issue
+except Exception as e:
+    print(f"[IMPORT ERROR] classify_issue: {e}", flush=True)
+    def classify_issue(issue):
+        return "general"  # fallback
+
+
+def run_inference():
+    print("[START] task=support_env", flush=True)  # MUST RUN ALWAYS
+
+    # ✅ Safe env initialization
+    if SupportEnv is None:
+        print("[ERROR] SupportEnv not available", flush=True)
+        return {"score": 0.0}
+
+    try:
+        env = SupportEnv()
+        state = env.reset()
+    except Exception as e:
+        print(f"[ERROR] env init failed: {e}", flush=True)
+        return {"score": 0.0}
 
     total_reward = 0
     steps = 0
+    done = False
 
     try:
-        while True:
+        while not done:
             tickets = getattr(state, "tickets", [])
             if not tickets:
                 break
@@ -20,7 +53,11 @@ def run_inference():
 
                 issue = str(getattr(ticket, "issue", "")).lower()
 
-                assign = classify_issue(issue)
+                # ✅ Safe classification
+                try:
+                    assign = classify_issue(issue)
+                except Exception:
+                    assign = "general"
 
                 action = {
                     "ticket_id": ticket_id,
@@ -28,30 +65,36 @@ def run_inference():
                     "response": "We are working on your issue, thank you for your patience."
                 }
 
+                # Convert dict → object (as required)
                 obj = type("Action", (), {})()
                 for k, v in action.items():
                     setattr(obj, k, v)
 
-                state, reward, done, _ = env.step(obj)
+                try:
+                    state, reward, done, _ = env.step(obj)
+                except Exception as e:
+                    print(f"[ERROR] step failed: {e}", flush=True)
+                    done = True
+                    break
 
                 steps += 1
                 total_reward += reward
 
-                # ✅ REQUIRED FORMAT
                 print(f"[STEP] step={steps} reward={reward}", flush=True)
 
                 if done:
                     break
 
-            if done:
-                break
-
     except Exception as e:
-        print(f"[ERROR] message={str(e)}", flush=True)
+        print(f"[ERROR] runtime error: {e}", flush=True)
 
     score = round(total_reward / steps, 2) if steps > 0 else 0.0
 
-    # ✅ REQUIRED FORMAT
     print(f"[END] task=support_env score={score} steps={steps}", flush=True)
 
     return {"score": score}
+
+
+if __name__ == "__main__":
+    result = run_inference()
+    print(result, flush=True)
