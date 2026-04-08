@@ -1,34 +1,49 @@
-import sys
 import os
+from openai import OpenAI
 
-# ✅ Fix path for Hugging Face environment
-BASE_DIR = os.path.dirname(__file__)
-APP_DIR = os.path.join(BASE_DIR, "app")
-sys.path.append(APP_DIR)
+# ✅ Correct import (matches your fixed env.py)
+from app.env import SupportEnv
 
-# ✅ Safe imports
-try:
-    from env import SupportEnv
-except Exception as e:
-    print(f"[IMPORT ERROR] SupportEnv: {e}", flush=True)
-    SupportEnv = None
+# ✅ Initialize client using PROVIDED proxy (MANDATORY)
+client = OpenAI(
+    base_url=os.environ.get("API_BASE_URL"),
+    api_key=os.environ.get("API_KEY")
+)
 
-try:
-    from models import classify_issue
-except Exception as e:
-    print(f"[IMPORT ERROR] classify_issue: {e}", flush=True)
-    def classify_issue(issue):
-        return "general"  # fallback
+# ✅ LLM-based classification (REQUIRED for validation)
+def classify_issue_llm(issue):
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Classify the issue into either 'billing' or 'technical'. Return only one word."
+                },
+                {
+                    "role": "user",
+                    "content": issue
+                }
+            ],
+            max_tokens=5
+        )
+
+        result = response.choices[0].message.content.strip().lower()
+
+        if result not in ["billing", "technical"]:
+            return "technical"
+
+        return result
+
+    except Exception as e:
+        print(f"[LLM ERROR] {e}", flush=True)
+        return "technical"
 
 
 def run_inference():
-    print("[START] task=support_env", flush=True)  # MUST RUN ALWAYS
+    print("[START] task=support_env", flush=True)
 
-    # ✅ Safe env initialization
-    if SupportEnv is None:
-        print("[ERROR] SupportEnv not available", flush=True)
-        return {"score": 0.0}
-
+    # ✅ Safe env init
     try:
         env = SupportEnv()
         state = env.reset()
@@ -53,11 +68,8 @@ def run_inference():
 
                 issue = str(getattr(ticket, "issue", "")).lower()
 
-                # ✅ Safe classification
-                try:
-                    assign = classify_issue(issue)
-                except Exception:
-                    assign = "general"
+                # ✅ MUST use LLM (this triggers LiteLLM proxy usage)
+                assign = classify_issue_llm(issue)
 
                 action = {
                     "ticket_id": ticket_id,
@@ -65,7 +77,7 @@ def run_inference():
                     "response": "We are working on your issue, thank you for your patience."
                 }
 
-                # Convert dict → object (as required)
+                # Convert dict → object
                 obj = type("Action", (), {})()
                 for k, v in action.items():
                     setattr(obj, k, v)
