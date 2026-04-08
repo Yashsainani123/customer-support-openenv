@@ -1,5 +1,6 @@
 # app/tasks.py
 
+# ✅ Task 1
 def easy_task(env):
     state = env.reset()
     total_reward = 0.0
@@ -24,10 +25,7 @@ def easy_task(env):
     return float(total_reward)
 
 
-def easy_grader(score):
-    return float(score)
-
-
+# ✅ Task 2
 def medium_task(env):
     state = env.reset()
     total_reward = 0.0
@@ -52,10 +50,7 @@ def medium_task(env):
     return float(total_reward)
 
 
-def medium_grader(score):
-    return float(score)
-
-
+# ✅ Task 3
 def hard_task(env):
     state = env.reset()
     total_reward = 0.0
@@ -80,13 +75,22 @@ def hard_task(env):
     return float(total_reward)
 
 
+# ✅ FIXED GRADERS (STRICTLY BETWEEN 0 AND 1)
+def easy_grader(score):
+    return max(0.01, min(0.99, float(score) / 10))
+
+
+def medium_grader(score):
+    return max(0.01, min(0.99, float(score) / 10))
+
+
 def hard_grader(score):
-    return float(score)
+    return max(0.01, min(0.99, float(score) / 10))
 
 
-# 🔥 DO NOT MODIFY THIS STRUCTURE
+# ✅ REQUIRED FORMAT
 TASKS = [
-    {"name": "task_easy", "task": easy_task, "grader": easy_grader},
-    {"name": "task_medium", "task": medium_task, "grader": medium_grader},
-    {"name": "task_hard", "task": hard_task, "grader": hard_grader},
+    {"name": "easy_task", "task": easy_task, "grader": easy_grader},
+    {"name": "medium_task", "task": medium_task, "grader": medium_grader},
+    {"name": "hard_task", "task": hard_task, "grader": hard_grader},
 ]
