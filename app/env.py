@@ -1,6 +1,6 @@
 import random
-from models import Ticket, Agent, Observation
-from reward import calculate_reward
+from app.env import SupportEnv
+from app.models import classify_issue
 
 class SupportEnv:
     def __init__(self):
