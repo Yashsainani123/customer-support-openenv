@@ -93,3 +93,4 @@ TASKS = [
         "grader": hard_grader,
     },
 ]
+__all__ = ["TASKS"]
