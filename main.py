@@ -1,32 +1,36 @@
 from fastapi import FastAPI, HTTPException
+import uvicorn
 from app.env import SupportEnv
-from app.models import Action
-
-# ✅ Import the task and grader functions you built in tasks.py
 from app.tasks import easy_task, medium_task, hard_task, easy_grader, medium_grader, hard_grader
 
 app = FastAPI()
-env = SupportEnv()
 
+# ✅ RESET
 @app.post("/reset")
 def reset():
+    env = SupportEnv()
     return env.reset()
 
+# ✅ STATE
 @app.get("/state")
 def state():
+    env = SupportEnv()
     return env.state()
 
+# ✅ STEP
 @app.post("/step")
-def step(action: Action):
-    obs, reward, done, info = env.step(action)
+def step(action: dict):
+    env = SupportEnv()
+    obj = type("Action", (), action)
+    state, reward, done, _ = env.step(obj)
     return {
-        "observation": obs,
+        "state": state,
         "reward": reward,
-        "done": done,
-        "info": info
+        "done": done
     }
 
-# ✅ Keep the tasks clearly defined
+# ✅ TASKS (CRITICAL)
+@app.post("/tasks")
 @app.get("/tasks")
 def tasks():
     return [
@@ -35,29 +39,26 @@ def tasks():
         {"id": "hard_task", "grader": "/grader/hard_task"}
     ]
 
-@app.get("/baseline")
-def baseline():
-    return {"message": "Baseline agent uses simple keyword matching"}
-
-# ✅ The Fix: Create dynamic grader routing for all 3 tasks
+# ✅ GRADERS (CRITICAL)
 @app.post("/grader/{task_name}")
 def grade_task(task_name: str):
-    env.reset() # Reset the environment for the grader
-    
+
+    env = SupportEnv()
+
     if task_name == "easy_task":
-        raw_score = easy_task(env)
-        final_score = easy_grader(raw_score)
-        return {"score": final_score}
-        
+        score = easy_grader(easy_task(env))
     elif task_name == "medium_task":
-        raw_score = medium_task(env)
-        final_score = medium_grader(raw_score)
-        return {"score": final_score}
-        
+        score = medium_grader(medium_task(env))
     elif task_name == "hard_task":
-        raw_score = hard_task(env)
-        final_score = hard_grader(raw_score)
-        return {"score": final_score}
-        
+        score = hard_grader(hard_task(env))
     else:
         raise HTTPException(status_code=404, detail="Task not found")
+
+    return {"score": float(score)}
+
+# ✅ RUN
+def main():
+    uvicorn.run(app, host="0.0.0.0", port=7860)
+
+if __name__ == "__main__":
+    main()
