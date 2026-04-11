@@ -5,12 +5,15 @@ endpoints:
   reset: /reset
   step: /step
   state: /state
-  tasks: /tasks  
+  tasks: /tasks
 
 tasks:
   - id: easy_task
+    entry_point: /grader/easy_task
     grader: /grader/easy_task
   - id: medium_task
+    entry_point: /grader/medium_task
     grader: /grader/medium_task
   - id: hard_task
+    entry_point: /grader/hard_task
     grader: /grader/hard_task
