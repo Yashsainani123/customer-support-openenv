@@ -29,22 +29,21 @@ def step(action: dict):
         "done": done
     }
 
-# ✅ TASKS (CRITICAL)
-@app.post("/tasks")
+# ✅ TASKS (CRITICAL) — added entry_point field
 @app.get("/tasks")
+@app.post("/tasks")
 def tasks():
     return [
-        {"id": "easy_task", "grader": "/grader/easy_task"},
-        {"id": "medium_task", "grader": "/grader/medium_task"},
-        {"id": "hard_task", "grader": "/grader/hard_task"}
+        {"id": "easy_task", "entry_point": "/grader/easy_task", "grader": "/grader/easy_task"},
+        {"id": "medium_task", "entry_point": "/grader/medium_task", "grader": "/grader/medium_task"},
+        {"id": "hard_task", "entry_point": "/grader/hard_task", "grader": "/grader/hard_task"}
     ]
 
-# ✅ GRADERS (CRITICAL)
+# ✅ GRADERS (CRITICAL) — added GET support alongside POST
+@app.get("/grader/{task_name}")
 @app.post("/grader/{task_name}")
 def grade_task(task_name: str):
-
     env = SupportEnv()
-
     if task_name == "easy_task":
         score = easy_grader(easy_task(env))
     elif task_name == "medium_task":
@@ -53,8 +52,7 @@ def grade_task(task_name: str):
         score = hard_grader(hard_task(env))
     else:
         raise HTTPException(status_code=404, detail="Task not found")
-
-    return {"score": float(score)}
+    return {"score": float(score), "task": task_name}
 
 # ✅ RUN
 def main():
