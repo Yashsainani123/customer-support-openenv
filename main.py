@@ -1,6 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from app.env import SupportEnv
 from app.models import Action
+
+# ✅ Import the task and grader functions you built in tasks.py
+from app.tasks import easy_task, medium_task, hard_task, easy_grader, medium_grader, hard_grader
 
 app = FastAPI()
 env = SupportEnv()
@@ -23,59 +26,38 @@ def step(action: Action):
         "info": info
     }
 
-# ✅ TASKS ENDPOINT
+# ✅ Keep the tasks clearly defined
 @app.get("/tasks")
 def tasks():
     return [
-        {"name": "easy_task", "goal": "Assign correct department"},
-        {"name": "medium_task", "goal": "Assign + good response"},
-        {"name": "hard_task", "goal": "Handle SLA, load, multiple tickets"}
+        {"id": "easy_task", "grader": "/grader/easy_task"},
+        {"id": "medium_task", "grader": "/grader/medium_task"},
+        {"id": "hard_task", "grader": "/grader/hard_task"}
     ]
 
-# ✅ BASELINE ENDPOINT
 @app.get("/baseline")
 def baseline():
     return {"message": "Baseline agent uses simple keyword matching"}
 
-@app.post("/grader")
-def grader():
-    env.reset()
-
-    total_reward = 0
-    steps = 0
-
-    # ✅ Priority + Deadline sorting
-    priority_map = {"high": 0, "medium": 1, "low": 2}
-
-    sorted_tickets = sorted(
-        env.tickets,
-        key=lambda t: (priority_map[t.priority], t.deadline)
-    )
-
-    for t in sorted_tickets:
-
-        if "payment" in t.issue:
-            response = "We are processing your payment issue, sorry for inconvenience."
-            assign_to = "billing"
-
-        elif "login" in t.issue:
-            response = "Please reset your password to fix login issue, thank you."
-            assign_to = "technical"
-
-        else:
-            response = "We are fixing the bug, thank you for reporting."
-            assign_to = "technical"
-
-        action = {
-            "ticket_id": t.id,
-            "assign_to": assign_to,
-            "response": response
-        }
-
-        obs, reward, done, _ = env.step(type("obj", (), action))
-        total_reward += reward
-        steps += 1
-
-    score = total_reward / steps
-
-    return {"score": round(score, 2)}
+# ✅ The Fix: Create dynamic grader routing for all 3 tasks
+@app.post("/grader/{task_name}")
+def grade_task(task_name: str):
+    env.reset() # Reset the environment for the grader
+    
+    if task_name == "easy_task":
+        raw_score = easy_task(env)
+        final_score = easy_grader(raw_score)
+        return {"score": final_score}
+        
+    elif task_name == "medium_task":
+        raw_score = medium_task(env)
+        final_score = medium_grader(raw_score)
+        return {"score": final_score}
+        
+    elif task_name == "hard_task":
+        raw_score = hard_task(env)
+        final_score = hard_grader(raw_score)
+        return {"score": final_score}
+        
+    else:
+        raise HTTPException(status_code=404, detail="Task not found")
