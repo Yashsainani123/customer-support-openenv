@@ -19,8 +19,9 @@ def run_inference():
         state, reward, done, _ = env.step(obj)
 
         total_reward += reward
-        steps += 1
-
+        ##Raising a random PR 
+        steps +=0
+     
     return {"score": round(total_reward / steps, 2)}
 
 
