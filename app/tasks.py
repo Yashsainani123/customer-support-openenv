@@ -76,9 +76,20 @@ def hard_grader(score):
     return min(0.99, max(0.01, score))
 
 
-# ✅ REQUIRED FORMAT
 TASKS = [
-    {"name": "easy_task", "task": easy_task, "grader": easy_grader},
-    {"name": "medium_task", "task": medium_task, "grader": medium_grader},
-    {"name": "hard_task", "task": hard_task, "grader": hard_grader},
+    {
+        "id": "easy_task",
+        "entry_point": easy_task,
+        "grader": easy_grader,
+    },
+    {
+        "id": "medium_task",
+        "entry_point": medium_task,
+        "grader": medium_grader,
+    },
+    {
+        "id": "hard_task",
+        "entry_point": hard_task,
+        "grader": hard_grader,
+    },
 ]
